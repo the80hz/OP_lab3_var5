@@ -1,47 +1,59 @@
-/* Fragment search and replacement.
- * Highlight the replaced fragments with brackets.
- * Print out the old text and the new one.
- */
-
 #include <stdio.h>
-#include <stdlib.h>
 #include <string.h>
+#include <locale.h>
+#include <Windows.h>
 
 #define MAXLINE 1000
 
-void replace(char *orig, char *old, char *new, char *result){
-    while(*orig){
-        if(strncmp(orig, old, strlen(old)) == 0){
-            strcpy(result, new);
-            result += strlen(new);
-            orig += strlen(old);
-        }else{
-            *result++ = *orig++;
+void replace(char* orig, char* old_fragment, char* new_fragment) {
+    char result[MAXLINE] = "";
+    char text[MAXLINE] = "";
+
+    old_fragment[strlen(old_fragment) - 1] = '\0';
+    new_fragment[strlen(new_fragment) - 1] = '\0';
+
+    while (*orig) {
+        if (strncmp(orig, old_fragment, strlen(old_fragment)) == 0) {
+            strcat_s(result, "(");
+            strcat_s(result, new_fragment);
+            strcat_s(result, ")");
+
+            strcat_s(text, "(");
+            strcat_s(text, old_fragment);
+            strcat_s(text, ")");
+
+            orig += strlen(old_fragment);
+        }
+        else {
+            strncat_s(result, orig, 1);
+            strncat_s(text, orig, 1);
+            orig++;
         }
     }
-    *result = '\0';
+
+	strcpy_s(new_fragment, MAXLINE, result);
+	strcpy_s(old_fragment, MAXLINE, text);
 }
 
 int main()
 {
+    setlocale(LC_ALL, "Russian");
+    SetConsoleOutputCP(1251);
+    SetConsoleCP(1251);
     printf("Enter the original string: \n");
     char text[MAXLINE];
     fgets(text, MAXLINE, stdin);
     printf("Enter the fragment to be replaced: \n");
-    char fragment[MAXLINE];
-    fgets(fragment, MAXLINE, stdin);
+    char old[MAXLINE];
+    fgets(old, MAXLINE, stdin);
     printf("Enter the new fragment: \n");
-    char new_fragment[MAXLINE];
-    fgets(new_fragment, MAXLINE, stdin);
+    char new_str[MAXLINE];
+    fgets(new_str, MAXLINE, stdin);
 
-    char result[MAXLINE];
-    strcpy(result, text);
-    replace(text, fragment, new_fragment, result);
+    replace(text, old, new_str);
 
-    printf("The original string is: \n");
-    printf("%s", text);
-    printf("The new string is: \n");
-    printf("%s", result);
+    printf("Original string: %s", old);
+    printf("Replaced string: %s", new_str);
 
     return 0;
 }
